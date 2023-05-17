@@ -1,0 +1,12 @@
+1) library.R - import library
+2) active contract.R - find active contract of future/option
+3) api.R - download data according to active contract found
+4) function.R - self-defined functions
+5) clean.R - data cleansing
+
+look at prelim.R, prelim_ta.R, prelim_10m.R for previous trading idea
+time interval of prelim.R and prelim_ta.R are too short to cover trading cost
+
+prelim_10m.R starts to work, but still not enough for trading cost
+
+bt_10min_parallel.R is optimization of strategies in bar interval of 10 min

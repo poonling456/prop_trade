@@ -1,0 +1,229 @@
+10-5-2018 
+The fucking buggy stoploss
+
+6-6-2018
+included txn cost, 
+sig_n=seriesIncr(macd_hist) & macd_hist<0
+sig_x=seriesDecr(macd_hist)
+sr droppeed from 1.8 to -0.2 :0)))))))
+
+sig_n=seriesIncr(macd_hist) & macd_hist<0
+sig_x=seriesDecr(macd_hist) & macd_hist>0
+sr dropped from 0.7 to 0.2
+guess it is because this trade less frequently
+
+sr of signal
+1,1: seriesIncr(macd_hist) / seriesDecr(macd_hist)
+1,2: ... / ...+macd_hist>0
+2,1: ...+macd_hist<0 / ...
+2,2: ...+macd_hist<0 / ...+macd_hist>0
+
+For no stop loss,
+              1          2
+[1,] 0.01849327 -0.6722346
+[2,] 1.76892251  0.7474807
+
+100% trailing stop,
+             1          2
+[1,] -0.277920 -0.2251382
+[2,]  2.262441  2.3228146
+
+99.5% trailing stop,
+                1         2
+[1,] -0.007114186 0.1447131
+[2,]  1.116781072 1.3724036
+
+99% trailing stop,
+             1         2
+[1,] 0.2424293 0.5311158
+[2,] 1.3170401 1.5661714
+
+After transaction cost included, only no stop loss 2,2 has +ve sr.
+99.5% trailing stop perform better then 100% trailing stop but no better than no stop loss.
+
+After optimization, best sr is 0.3753112 in fast 32, slow 78, sig 26
+
+7-6-2018
+Took a look at
+sig_n=seriesIncr(macd_hist) & macd_hist<0
+sig_x=lag(macd_hist>0) & macd_hist<0
+
+macd_hist<0 sometimes barred profitable trading opportunity
+might need a longer term screen
+
+
+this seems to be working, sr 2, nfast 40, nslow 74, nsig 40, ema 40, no stop
+sig_n=golden_cross(macd$macd,macd$signal) & seriesIncr(ema)
+sig_x=golden_cross(macd$signal,macd$macd) 
+
+
+8-6-2018
+tried adding a ema screen, it worked, with max sr 0.0272519 !!!!
+
+iter1, 2, 3, 4 are nFast, nSlow, nScreen, threshold
+> iter1[11]
+[1] 40
+> iter2[10]
+[1] 88
+> iter3[7]
+[1] 44
+iter4[18]
+[1] 0.997
+
+
+11-6-2018
+extended the optimization boundary but forgot to divide in sample period and out sample period
+sr 0.03200368, win rate 0.4705882, trade 17, mean duration 3.529412
+> iter1[9]
+[1] 46
+> iter2[5]
+[1] 88
+> iter3[8]
+[1] 48
+> iter4[9]
+[1] 0.998
+
+took a look at the graph, number of trades is way too sparse... , total return 3 %, trading 15 times, average duration 5 bar
+buy too slowly, might want to go back to slope of MACD histogram
+
+12-6-2018
+changed entry signal to slope of histogram, not very effective, no of trade and duration does increase though
+
+> max(ret_total)
+[1] 0.04874208
+> max(sr)
+[1] 0.0167491
+> max(win_rate)
+[1] 0.75
+> 
+> head(ndarray_which(ret_total,max))
+     dim1 dim2 dim3 dim4
+[1,]    4   11    2    9
+> head(ndarray_which(sr,max))
+     dim1 dim2 dim3 dim4
+[1,]    4   11    2    9
+> head(ndarray_which(win_rate,max))
+     dim1 dim2 dim3 dim4
+[1,]   11    6   10    7
+[2,]   11    4   11    7
+[3,]   11    5   11    7
+[4,]   10    6   11    7
+[5,]   11    6   10    8
+[6,]   11    4   11    8
+> 
+
+added stop loss, sr dont exceed 2 still, total return dont exceed 5 %
+
+13-6-2018
+go back to
+sig_n = seriesIncr(macd$macd-macd$signal) & macd$macd<macd$signal & seriesIncr(ema)
+sig_x = seriesDecr(macd$macd-macd$signal) & macd$macd>macd$signal
+separated in sample and out of sample
+
+> max(ret_total)
+[1] 0.05718549
+> max(sr)
+[1] 0.02666403
+> max(win_rate)
+[1] 0.8666667
+> 
+> head(ndarray_which(ret_total,max))
+     dim1 dim2 dim3 dim4
+[1,]    3    5    4    1
+[2,]    3    6    4    1
+> head(ndarray_which(sr,max))
+     dim1 dim2 dim3 dim4
+[1,]    4    1    4    3
+[2,]    4    2    4    3
+[3,]    4    3    4    3
+> head(ndarray_which(win_rate,max))
+     dim1 dim2 dim3 dim4
+[1,]    4    1    3    1
+[2,]    4    2    3    1
+[3,]    4    3    3    1
+[4,]    4    1    4    1
+[5,]    4    2    4    1
+[6,]    4    3    4    1
+> 
+
+
+params are:
+macd=MACD(Cl(security),nFast = 14,nSlow = 90,nSig = 14)
+ema=EMA(Cl(security),112)
+threshold=.985
+
+note that no exit is by stop loss.
+
+
+2018-06-14
+SMA screen seems better 
+
+macd=MACD(Cl(security),nFast = 6,nSlow = 88,nSig = 30)
+MA_screen=SMA(Cl(security),100)
+
+sig_n=seriesIncr(macd$macd-macd$signal) & macd$macd-macd$signal<(0) & seriesIncr(ema)
+sig_x=seriesDecr(macd$macd-macd$signal) & macd$macd-macd$signal>(0)
+
+> head(ndarray_which(ret_total,max))
+     dim1 dim2 dim3 dim4
+[1,]    7    4    1    6
+> head(ndarray_which(sr,max))
+     dim1 dim2 dim3 dim4
+[1,]    1    3    7    6
+> head(ndarray_which(win_rate,max))
+     dim1 dim2 dim3 dim4
+[1,]    1    5    7    6
+[2,]    1    6    7    6
+[3,]    5    1    2    7
+[4,]    5    2    2    7
+[5,]    5    3    2    7
+[6,]    5    4    2    7
+> iter1[1]
+[1] 6
+> iter2[3]
+[1] 88
+> iter3[7]
+[1] 30
+> iter4[6]
+[1] 100
+
+
+> ret_total[1,3,7,6]
+[1] 0.08627057
+> dur_mean[1,3,7,6]
+[1] 19.47059
+> count[1,3,7,6]
+[1] 17
+> win_rate[1,3,7,6]
+[1] 0.8235294
+> mdd_dur[1,3,7,6]
+[1] 59
+> mdd_pct[1,3,7,6]
+[1] 0.01013616
+
+out of sample
+> perf$sr
+[1] 0.01613191
+> perf$trade
+[1] 30
+> perf$`win rate`
+[1] 0.6
+> perf$`holding period`
+[1] 21.46667
+
+
+
+2018-06-15
+found out some bugs .....
+the time object passed to perforamnce function is not by second but by 10 minute bar, possibly first and last bar of return is neglected...
+rerun the loop with correct time object
+
+fuckkkkkkkkkkk
+later the day, found that I have already fixed that, see function.R
+the rerun is very slowwwwwwwwww
+progress:
+nFast 14 nSlow 70 nSig 14 nScreen 112 
+
+but since there is not, the result should be the same
+
+go back to check progress one hour or so later, found no progress :0))))) + ram usage low, so I stop la

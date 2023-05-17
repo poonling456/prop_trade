@@ -1,0 +1,28 @@
+2018-06-15
+
+granger test
+> granger_result1
+Granger causality test
+
+Model 1: kee ~ Lags(kee, 1:5) + Lags(ckc, 1:5)
+Model 2: kee ~ Lags(kee, 1:5)
+   Res.Df Df      F    Pr(>F)    
+1 1079088                        
+2 1079093 -5 3314.8 < 2.2e-16 ***
+---
+Signif. codes:  0 ．***・ 0.001 ．**・ 0.01 ．*・ 0.05 ．.・ 0.1 ． ・ 1
+> granger_result2
+Granger causality test
+
+Model 1: ckc ~ Lags(ckc, 1:5) + Lags(kee, 1:5)
+Model 2: ckc ~ Lags(ckc, 1:5)
+   Res.Df Df      F    Pr(>F)    
+1 1079088                        
+2 1079093 -5 5670.1 < 2.2e-16 ***
+---
+Signif. codes:  0 ．***・ 0.001 ．**・ 0.01 ．*・ 0.05 ．.・ 0.1 ． ・ 1
+
+
+Stronger eveidence that kee lead ckc (kee cause ckc)
+
+cross correlation show same result
