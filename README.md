@@ -1,5 +1,5 @@
 # prop_trade
- Trading Strategies tested during my tenure in CASH Algo (Feb 2018 - Aug 2018)
+Trading strategies tested during my internship in a proprietary trading firm (Feb 2018 - Aug 2018)
  
 ### bullbear
 Attempt to use economic factors to predict bull/bear market
